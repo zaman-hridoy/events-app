@@ -1,5 +1,7 @@
 import React from 'react';
-import { Segment, List, Item, Label, Image } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
+import { Segment, List, Label, Image } from 'semantic-ui-react';
+import { objectToArray } from '../../../app/common/utils/helpers';
 
 export default function EventDetailedSidebar({ event }) {
     return (
@@ -16,8 +18,8 @@ export default function EventDetailedSidebar({ event }) {
         </Segment>
         <Segment attached>
             <List selection verticalAlign='middle'>
-                {event?.attendees?.map(item => (
-                    <List.Item style={{ position: 'relative' }} key={item?.id}>
+                {event?.attendees && objectToArray(event?.attendees).map((item) => (
+                    <List.Item style={{ position: 'relative' }} key={item.id}>
                         <Label
                             style={{ position: 'absolute' }}
                             color="orange"
@@ -27,7 +29,9 @@ export default function EventDetailedSidebar({ event }) {
                         </Label>
                         <Image avatar src={item?.photoURL} />
                         <List.Content>
-                            <List.Header>{item?.name}</List.Header>
+                            <List.Header as="h4">
+                              <Link to={`/profile/${item.id}`}>{item?.displayName}</Link>
+                            </List.Header>
                         </List.Content>
                     </List.Item>
                 ))}

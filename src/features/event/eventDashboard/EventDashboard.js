@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react';
-import { firestoreConnect } from 'react-redux-firebase';
+import { firestoreConnect, isLoaded, isEmpty } from 'react-redux-firebase';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import EventActivity from '../eventActivity/EventActivity';
+import LoadingComponent from '../../../app/common/LoadingComponent';
 
 import { 
   deleteEvent
@@ -70,6 +71,7 @@ class EventDashboard extends Component {
 
     render() {
         const { events } = this.props;
+        if(!isLoaded(events) || isEmpty(events)) return <LoadingComponent />
         return (
             <Grid>
                 <Grid.Column width={10}>

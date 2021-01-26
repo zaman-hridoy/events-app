@@ -8,16 +8,18 @@ import PhotosPage from './PhotosPage';
 import AccountPage from './AccountPage';
 import { connect } from 'react-redux';
 import { updatePassword } from '../../auth/authActions';
+import { updateProfile } from '../userActions';
+import moment from 'moment';
 
 
-const SettingsDashboard = ({ updatePassword, providerId }) => {
+const SettingsDashboard = ({ updatePassword, providerId, user, updateProfile }) => {
     return (
         <Grid>
             <Grid.Column width={12}>
                 <Switch>
                     <Redirect exact from="/settings" to="/settings/basic" />
-                    <Route path="/settings/basic" component={BasicPage} />
-                    <Route path="/settings/about" component={AboutPage} />
+                    <Route path="/settings/basic" render={() => <BasicPage initialValues={user} updateProfile={updateProfile} />} />
+                    <Route path="/settings/about" render={() => <AboutPage initialValues={user} updateProfile={updateProfile} />} />
                     <Route path="/settings/photos" component={PhotosPage} />
                     <Route path="/settings/account" render={() => 
                         <AccountPage 
@@ -33,11 +35,23 @@ const SettingsDashboard = ({ updatePassword, providerId }) => {
 }
 
 const actions = {
-    updatePassword
+    updatePassword,
+    updateProfile
 }
 
-const mapStateToProps = state => ({
-    providerId: !state.firebase.auth.isEmpty  && state.firebase.auth.providerData[0].providerId
-});
+const mapStateToProps = state => {
+    let user = {};
+    if(state.firebase.profile.dateOfBirth) {
+        user = {
+            ...state.firebase.profile,
+            dateOfBirth: state.firebase.profile.dateOfBirth.toDate(),
+            createdAt: state.firebase.profile.createdAt.toDate()
+        }
+    }
+    return {
+        providerId: !state.firebase.auth.isEmpty  && state.firebase.auth.providerData[0].providerId,
+        user
+    }
+};
 
 export default connect(mapStateToProps, actions)(SettingsDashboard);

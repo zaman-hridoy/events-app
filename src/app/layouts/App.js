@@ -11,6 +11,7 @@ import SettingsDashboard from '../../features/user/settings/SettingsDashboard';
 import EventForm from '../../features/event/eventForm/EventForm';
 import HomePage from '../../features/home/HomePage';
 import ModalManager from '../../features/modals/ModalManager';
+import NotFoundPage from '../common/NotFoundPage';
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/profile/:id" component={UserDetailedPage} />
                 <Route path="/settings" component={SettingsDashboard} />
                 <Route path="/create-event" component={EventForm} />
+                <Route path="/not-found" component={NotFoundPage} />
               </Switch>
             </Container>
           </div>

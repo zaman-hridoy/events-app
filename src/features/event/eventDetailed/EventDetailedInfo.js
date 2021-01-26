@@ -21,7 +21,7 @@ export default function EventDetailedInfo({ event }) {
               <Icon name="calendar" size="large" color="teal" />
             </Grid.Column>
             <Grid.Column width={15}>
-              {event && <span>{format(new Date(event?.date), 'PPPp')}</span>}
+              {event.date && <span>{event && format(new Date(event?.date), 'PPPp')}</span>}
             </Grid.Column>
           </Grid>
         </Segment>

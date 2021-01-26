@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { reduxForm, Field } from 'redux-form';
+import { withFirestore } from 'react-redux-firebase';
 import cuid from 'cuid';
 import moment from 'moment';
 import { Segment, Form, Button, Grid, Header } from 'semantic-ui-react';
 import { composeValidators, combineValidators, isRequired, hasLengthGreaterThan } from 'revalidate';
-import { createEvent, updateEvent } from '../eventActions';
+import { cancelToggle, createEvent, updateEvent } from '../eventActions';
 
 import TextInput from '../../../app/common/form/TextInput';
 import TextArea from '../../../app/common/form/TextArea';
@@ -37,6 +38,16 @@ const validate = combineValidators({
 
 class EventForm extends Component {
 
+    async componentDidMount() {
+        const { firestore, match } = this.props;
+        await firestore.setListener(`events/${match.params.id}`);
+    }
+
+    async componentWillUnmount() {
+      const { firestore, match } = this.props;
+      await firestore.unsetListener(`events/${match.params.id}`);
+  }
+
     onSubmitHandler = values => {
         const newData = {
           ...values,
@@ -46,18 +57,13 @@ class EventForm extends Component {
         this.props.updateEvent(newData);
         this.props.history.goBack();
       } else {
-        const newEvent = {
-          ...newData,
-          id: cuid(),
-          hostPhotoURL: '/assets/img/user.png'
-        }
-        this.props.createEvent(newEvent);
+        this.props.createEvent(values);
         this.props.history.push('/events');
       }
     }
 
     render() {
-        const { invalid, submitting, pristine } = this.props;
+        const { invalid, submitting, pristine, event, cancelToggle } = this.props;
         return (
             <Grid>
                 <Grid.Column width={10}>
@@ -112,6 +118,13 @@ class EventForm extends Component {
 
                       <Button disabled={invalid || submitting || pristine} positive type="submit">Submit</Button>
                       <Button onClick={this.props.history.goBack} type="button">Cancel</Button>
+                      <Button 
+                        onClick={() => cancelToggle(!event?.cancelled, event.id)}
+                        type="button"
+                        color={event?.cancelled ? 'green' : 'red'}
+                        floated="right"
+                        content={event?.cancelled ? 'Reactivate Event' : 'Cancel Event'}
+                      />
                     </Form>
                   </Segment>
                 </Grid.Column>
@@ -120,25 +133,28 @@ class EventForm extends Component {
     }
 }
 
-const mapSateToProps = (state, ownProps) => {
-  const eventId = ownProps.match.params.id;
+const mapSateToProps = (state) => {
   let event = {};
-  if(eventId && state.events.events.length > 0) {
-    event = state.events.events.filter(e => e.id === eventId)[0];
+  if(state.firestore.ordered.events && state.firestore.ordered.events[0]) {
+    event = {
+      ...state.firestore.ordered.events[0],
+      date: state.firestore.ordered.events[0].date.toDate()
+    };
   }
   return {
-    events: state.events.events,
-    initialValues: event
+    initialValues: event,
+    event
   }
 };
 
 const actions = {
   createEvent,
-  updateEvent
+  updateEvent,
+  cancelToggle
 }
 
-export default connect(mapSateToProps, actions)(reduxForm({
+export default withFirestore(connect(mapSateToProps, actions)(reduxForm({
   form: 'eventForm', 
   enableReinitialize: true,
   validate
-})(EventForm));
+})(EventForm)));

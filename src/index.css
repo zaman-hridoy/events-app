@@ -4,6 +4,10 @@ body {
   background-color: rgb(234, 234, 234);
 }
 
+.lazyload-wrapper {
+  display: inline-block;
+}
+
 .masthead {
   background-image: linear-gradient(
     135deg,
